@@ -11,54 +11,43 @@ export const getMateri = async (req, res) => {
     const order = [['updatedat', sortOrder]];
 
     try {
-        let response;
         const userWhereClause = {
             name: {
                 [Op.iLike]: `%${search}%`
             }
         };
 
-        if (req.role === "admin") {
-            response = await Materi.findAndCountAll({
-                limit,
-                offset,
-                order,
-                attributes: ['uuid', 'name_materi', 'img_materi', 'ket_materi', 'vid_materi', 'updatedat'],
-                include: [{
-                    model: User,
-                    attributes: ['name', 'email'],
-                    where: userWhereClause
-                }]
-            });
-        } else {
-            response = await Materi.findAndCountAll({
-                limit,
-                offset,
-                order,
-                attributes: ['uuid', 'name_materi', 'img_materi', 'ket_materi', 'vid_materi', 'updatedat'],
-                where: {
-                    userId: req.userId
-                },
-                include: [{
-                    model: User,
-                    attributes: ['name', 'email']
-                }]
-            });
-        }
+        // Menyusun query untuk mendapatkan materi yang sesuai dengan kriteria pencarian
+        const response = await Materi.findAndCountAll({
+            limit,
+            offset,
+            order,
+            attributes: ['uuid', 'name_materi', 'img_materi', 'ket_materi', 'vid_materi', 'updatedat'],
+            include: [{
+                model: User,
+                attributes: ['name', 'email'],
+                where: userWhereClause
+            }]
+        });
 
+        // Menghitung jumlah halaman berdasarkan total materi dan batas per halaman
         const totalPages = Math.ceil(response.count / limit);
+
+        // Mengirimkan response dengan data materi dan total halaman
         res.status(200).json({
             materi: response.rows,
             totalPages
         });
     } catch (error) {
+        // Mengirimkan pesan kesalahan jika terjadi error
         res.status(500).json({ msg: error.message });
     }
 };
 
+
 export const getMateriById = async (req, res) => {
     try {
-        const materi = await Materi.findOne({
+        const materi = await Materi.findAll({
             where: {
                 uuid: req.params.id
             }
@@ -67,7 +56,7 @@ export const getMateriById = async (req, res) => {
 
         let response;
         if (req.role === "admin") {
-            response = await Materi.findOne({
+            response = await Materi.findAll({
                 attributes: ['uuid', 'name_materi', 'img_materi', 'ket_materi', 'vid_materi', 'updatedat'],
                 where: {
                     id: materi.id
@@ -78,7 +67,7 @@ export const getMateriById = async (req, res) => {
                 }]
             });
         } else {
-            response = await Materi.findOne({
+            response = await Materi.findAll({
                 attributes: ['uuid', 'name_materi', 'img_materi', 'ket_materi', 'vid_materi', 'updatedat'],
                 where: {
                     [Op.and]: [{ id: materi.id }, { userId: req.userId }]

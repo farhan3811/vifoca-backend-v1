@@ -23,8 +23,15 @@ const Tugas = db.define('tugas', {
         }
     },
     materi_id: {
-        type: DataTypes.BIGINT,
+        type: DataTypes.INTEGER,
         allowNull: false,
+        references: {
+            model: Materis,
+            key: 'id'
+        },
+        validate: {
+            notEmpty: true
+        }
     },
     nama_soal: {
         type: DataTypes.STRING
@@ -56,11 +63,11 @@ const Tugas = db.define('tugas', {
     updatedAt: 'updatedat' 
 });
 
-// Associations
-Materis.hasMany(Tugas);
-Tugas.belongsTo(Materis, { foreignKey: 'materi_id' });
-
-Users.hasMany(Tugas);
+// Definisikan relasi
+Users.hasMany(Tugas, { foreignKey: 'userId' });
 Tugas.belongsTo(Users, { foreignKey: 'userId' });
+
+Materis.hasMany(Tugas, { foreignKey: 'materi_id' });
+Tugas.belongsTo(Materis, { foreignKey: 'materi_id' });
 
 export default Tugas;

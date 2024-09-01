@@ -3,10 +3,9 @@ import Users from "../models/UserModel.js";
 import Materis from "../models/MateriModel.js";
 import { Op } from "sequelize";
 
-// Fungsi untuk mendapatkan daftar tugas dengan pagination dan pencarian
 export const getTugas = async (req, res) => {
-    const page = parseInt(req.query.page) || 1;
-    const limit = 5; // Jumlah item per halaman
+    const page = parseInt(req.query.page, 10) || 1;
+    const limit = Math.min(parseInt(req.query.limit, 10) || 5, 50); // Max limit to 50
     const offset = (page - 1) * limit;
     const search = req.query.search || '';
     const sortOrder = req.query.sortOrder || 'desc';
@@ -17,27 +16,34 @@ export const getTugas = async (req, res) => {
             [Op.or]: [
                 {
                     nama_soal: {
-                        [Op.iLike]: `%${search}%` // Pencarian tidak peka huruf besar/kecil
+                        [Op.iLike]: `%${search}%`
                     }
                 }
             ]
         };
 
-        let response;
-        if (req.role === "admin") {
-            response = await Tugas.findAndCountAll({
-                ...commonOptions,
-                where: searchConditions
-            });
-        } else {
-            response = await Tugas.findAndCountAll({
-                ...commonOptions,
-                where: {
-                    userId: req.userId,
-                    ...searchConditions
+        const commonOptions = {
+            include: [
+                {
+                    model: Users,
+                    attributes: ['name', 'email']
+                },
+                {
+                    model: Materis,
+                    attributes: ['name_materi', 'ket_materi']
                 }
-            });
-        }
+            ],
+            limit,
+            offset,
+            order
+        };
+
+        const whereClause = req.role === "admin" ? searchConditions : { userId: req.userId, ...searchConditions };
+        
+        const response = await Tugas.findAndCountAll({
+            ...commonOptions,
+            where: whereClause
+        });
 
         const totalPages = Math.ceil(response.count / limit);
         res.status(200).json({
@@ -45,11 +51,11 @@ export const getTugas = async (req, res) => {
             totalPages
         });
     } catch (error) {
-        res.status(500).json({ msg: error.message });
+        console.error("Error fetching tasks:", error);
+        res.status(500).json({ msg: "Failed to fetch tasks" });
     }
 };
 
-// Fungsi untuk mendapatkan tugas berdasarkan UUID
 export const getTugasById = async (req, res) => {
     try {
         const tugas = await Tugas.findOne({
@@ -61,7 +67,7 @@ export const getTugasById = async (req, res) => {
                 },
                 {
                     model: Materis,
-                    attributes: ['judul_materi', 'deskripsi'] // Sesuaikan atribut jika diperlukan
+                    attributes: ['name_materi', 'ket_materi']
                 }
             ]
         });
@@ -74,12 +80,14 @@ export const getTugasById = async (req, res) => {
             res.status(403).json({ msg: "Akses terlarang" });
         }
     } catch (error) {
-        res.status(500).json({ msg: error.message });
+        console.error("Error fetching task by ID:", error);
+        res.status(500).json({ msg: "Failed to fetch task by ID" });
     }
 };
+
 export const createTugas = async (req, res) => {
     const { nama_soal, status_level, ket_assigment, deadline, materi_id } = req.body;
-    const foto_tugas = req.file ? req.file.path : null; // Mendapatkan path file yang diupload
+    const foto_tugas = req.file ? req.file.path : null;
 
     try {
         await Tugas.create({
@@ -89,15 +97,15 @@ export const createTugas = async (req, res) => {
             ket_assigment,
             deadline,
             userId: req.userId,
-            materi_id: BigInt(materi_id) // Pastikan penanganan BIGINT
+            materi_id
         });
         res.status(201).json({ msg: "Tugas berhasil dibuat" });
     } catch (error) {
-        res.status(500).json({ msg: error.message });
+        console.error("Error creating task:", error);
+        res.status(500).json({ msg: "Failed to create task" });
     }
 };
 
-// Fungsi untuk memperbarui tugas berdasarkan UUID
 export const updateTugas = async (req, res) => {
     try {
         const tugas = await Tugas.findOne({
@@ -107,7 +115,7 @@ export const updateTugas = async (req, res) => {
         if (!tugas) return res.status(404).json({ msg: "Data tidak ditemukan" });
 
         const { nama_soal, status_level, ket_assigment, deadline, materi_id } = req.body;
-        const foto_tugas = req.file ? req.file.path : tugas.foto_tugas; // Perbarui gambar jika diberikan
+        const foto_tugas = req.file ? req.file.path : tugas.foto_tugas;
 
         if (req.role === "admin" || req.userId === tugas.userId) {
             await Tugas.update({
@@ -116,7 +124,7 @@ export const updateTugas = async (req, res) => {
                 foto_tugas,
                 ket_assigment,
                 deadline,
-                materi_id: materi_id ? BigInt(materi_id) : tugas.materi_id // Perbarui jika diberikan, jika tidak tetap gunakan yang lama
+                materi_id
             }, {
                 where: { uuid: req.params.id }
             });
@@ -125,11 +133,11 @@ export const updateTugas = async (req, res) => {
             res.status(403).json({ msg: "Akses terlarang" });
         }
     } catch (error) {
-        res.status(500).json({ msg: error.message });
+        console.error("Error updating task:", error);
+        res.status(500).json({ msg: "Failed to update task" });
     }
 };
 
-// Fungsi untuk menghapus tugas berdasarkan UUID
 export const deleteTugas = async (req, res) => {
     try {
         const tugas = await Tugas.findOne({
@@ -147,6 +155,7 @@ export const deleteTugas = async (req, res) => {
             res.status(403).json({ msg: "Akses terlarang" });
         }
     } catch (error) {
-        res.status(500).json({ msg: error.message });
+        console.error("Error deleting task:", error);
+        res.status(500).json({ msg: "Failed to delete task" });
     }
 };
