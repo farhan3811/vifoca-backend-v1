@@ -1,6 +1,5 @@
 import User from "../models/UserModel.js";
 
-// Middleware untuk memverifikasi apakah user sudah login
 export const verifyUser = async (req, res, next) => {
     try {
         if (!req.session.userId) {
