@@ -16,8 +16,6 @@ export const getMateri = async (req, res) => {
                 [Op.iLike]: `%${search}%`
             }
         };
-
-        // Menyusun query untuk mendapatkan materi yang sesuai dengan kriteria pencarian
         const response = await Materi.findAndCountAll({
             limit,
             offset,
@@ -29,17 +27,12 @@ export const getMateri = async (req, res) => {
                 where: userWhereClause
             }]
         });
-
-        // Menghitung jumlah halaman berdasarkan total materi dan batas per halaman
         const totalPages = Math.ceil(response.count / limit);
-
-        // Mengirimkan response dengan data materi dan total halaman
         res.status(200).json({
             materi: response.rows,
             totalPages
         });
     } catch (error) {
-        // Mengirimkan pesan kesalahan jika terjadi error
         res.status(500).json({ msg: error.message });
     }
 };
@@ -91,7 +84,7 @@ export const createMateri = async (req, res) => {
     try {
         await Materi.create({
             name_materi,
-            img_materi, // Menggunakan variabel img_materi
+            img_materi,
             ket_materi,
             vid_materi,
             userId: req.userId

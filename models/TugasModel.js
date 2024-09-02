@@ -23,15 +23,7 @@ const Tugas = db.define('tugas', {
         }
     },
     materi_id: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-            model: Materis,
-            key: 'id'
-        },
-        validate: {
-            notEmpty: true
-        }
+        type: DataTypes.INTEGER
     },
     nama_soal: {
         type: DataTypes.STRING
@@ -59,11 +51,9 @@ const Tugas = db.define('tugas', {
 }, {
     freezeTableName: true,
     timestamps: true,
-    createdAt: 'createdat',  // Map kolom createdAt ke createdat
+    createdAt: 'createdat', 
     updatedAt: 'updatedat' 
 });
-
-// Definisikan relasi
 Users.hasMany(Tugas, { foreignKey: 'userId' });
 Tugas.belongsTo(Users, { foreignKey: 'userId' });
 

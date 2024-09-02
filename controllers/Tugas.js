@@ -89,6 +89,11 @@ export const createTugas = async (req, res) => {
     const { nama_soal, status_level, ket_assigment, deadline, materi_id } = req.body;
     const foto_tugas = req.file ? req.file.path : null;
 
+    // Validasi input
+    if (!materi_id) {
+        return res.status(400).json({ msg: "Materi ID is required" });
+    }
+
     try {
         await Tugas.create({
             nama_soal,
@@ -99,12 +104,43 @@ export const createTugas = async (req, res) => {
             userId: req.userId,
             materi_id
         });
+        const data = await Tugas.create(Tugas);
+        res.send(data);
         res.status(201).json({ msg: "Tugas berhasil dibuat" });
     } catch (error) {
         console.error("Error creating task:", error);
-        res.status(500).json({ msg: "Failed to create task" });
+        res.status(500).json({ msg: "Failed to create task", error: error.message });
+    }
+    try {
+        // Validate request
+        if (!req.body.nama_soal || !req.file) {
+            return res.status(400).send({
+                message: "Nama soal and foto tugas cannot be empty!"
+            });
+        }
+
+        // Create an Assigment object
+        const Tugas = {
+            materi_id: req.body.materi_id,
+            nama_soal: req.body.nama_soal,
+            status_level: req.body.status_level,
+            foto_tugas: req.file.path, // Handle file upload
+            ket_assigment: req.body.ket_assigment,
+            deadline: req.body.deadline ? new Date(req.body.deadline) : null,
+            userId: req.userId
+        };
+
+        // Save Assigment in the database
+        const data = await Assigment.create(assigment);
+        res.send(data);
+    } catch (err) {
+        console.error("Error creating assignment:", err); // Log the error for debugging
+        res.status(500).send({
+            message: err.message || "Some error occurred while creating the assignment."
+        });
     }
 };
+
 
 export const updateTugas = async (req, res) => {
     try {
