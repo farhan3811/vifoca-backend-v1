@@ -23,6 +23,9 @@ const Users = db.define('users', {
     prodi: {
         type: DataTypes.STRING
     },
+    tgllahir: {
+        type: DataTypes.DATE
+    },
     nim: {
         type: DataTypes.BIGINT,
         allowNull: false,
@@ -40,6 +43,9 @@ const Users = db.define('users', {
             isEmail: true
         }
     },
+    nomorhp: {
+        type: DataTypes.BIGINT,
+    },
     password: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -56,9 +62,6 @@ const Users = db.define('users', {
         validate: {
             notEmpty: true
         }
-    },
-    biodata_id: {
-        type: DataTypes.BIGINT
     }
 }, {
     freezeTableName: true,

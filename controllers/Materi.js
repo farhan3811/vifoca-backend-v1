@@ -4,7 +4,7 @@ import { Op } from "sequelize";
 
 export const getMateri = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
-    const limit = 5;
+    const limit = 8;
     const offset = (page - 1) * limit;
     const search = req.query.search || '';
     const sortOrder = req.query.sortOrder || "desc";

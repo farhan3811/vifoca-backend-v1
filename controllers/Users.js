@@ -20,7 +20,7 @@ export const getUsers = async (req, res) => {
             limit,
             offset,
             order: [order],
-            attributes: ['uuid', 'name', 'prodi', 'nim', 'email', 'avatar', 'biodata_id', 'createdat', 'updatedat', 'role'],
+            attributes: ['uuid', 'name', 'prodi', 'nim', 'email', 'avatar', 'createdat', 'updatedat', 'role'],
             where: {
                 name: {
                     [Op.iLike]: `%${search}%` // Pencarian berdasarkan nama
@@ -42,7 +42,7 @@ export const getUsers = async (req, res) => {
 export const getUserById = async (req, res) => {
     try {
         const response = await User.findOne({
-            attributes: ['uuid', 'name', 'prodi', 'nim', 'email', 'avatar', 'biodata_id', 'createdat', 'updatedat', 'role'],
+            attributes: ['uuid', 'name', 'prodi', 'nim', 'email', 'avatar', 'createdat', 'updatedat', 'role'],
             where: {
                 uuid: req.params.id
             }
