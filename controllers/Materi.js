@@ -20,7 +20,7 @@ export const getMateri = async (req, res) => {
             limit,
             offset,
             order,
-            attributes: ['uuid', 'name_materi', 'img_materi', 'ket_materi', 'vid_materi', 'updatedat'],
+            attributes: ['id', 'name_materi', 'img_materi', 'ket_materi', 'vid_materi', 'updatedat'],  // Gunakan id sebagai pengenal
             include: [{
                 model: User,
                 attributes: ['name', 'email'],
@@ -37,20 +37,19 @@ export const getMateri = async (req, res) => {
     }
 };
 
-
 export const getMateriById = async (req, res) => {
     try {
-        const materi = await Materi.findAll({
+        const materi = await Materi.findOne({
             where: {
-                uuid: req.params.id
+                id: req.params.id  // Gunakan id sebagai kunci pencarian
             }
         });
         if (!materi) return res.status(404).json({ msg: "Data tidak ditemukan" });
 
         let response;
         if (req.role === "admin") {
-            response = await Materi.findAll({
-                attributes: ['uuid', 'name_materi', 'img_materi', 'ket_materi', 'vid_materi', 'updatedat'],
+            response = await Materi.findOne({
+                attributes: ['id', 'name_materi', 'img_materi', 'ket_materi', 'vid_materi', 'updatedat'],  // Gunakan id
                 where: {
                     id: materi.id
                 },
@@ -60,8 +59,8 @@ export const getMateriById = async (req, res) => {
                 }]
             });
         } else {
-            response = await Materi.findAll({
-                attributes: ['uuid', 'name_materi', 'img_materi', 'ket_materi', 'vid_materi', 'updatedat'],
+            response = await Materi.findOne({
+                attributes: ['id', 'name_materi', 'img_materi', 'ket_materi', 'vid_materi', 'updatedat'],  // Gunakan id
                 where: {
                     [Op.and]: [{ id: materi.id }, { userId: req.userId }]
                 },
@@ -87,7 +86,7 @@ export const createMateri = async (req, res) => {
             img_materi,
             ket_materi,
             vid_materi,
-            userId: req.userId
+            userId: req.userId  // Gunakan userId dari sesi pengguna
         });
         res.status(201).json({ msg: "Materi created successfully" });
     } catch (error) {
@@ -99,13 +98,13 @@ export const updateMateri = async (req, res) => {
     try {
         const materi = await Materi.findOne({
             where: {
-                uuid: req.params.id
+                id: req.params.id  // Gunakan id sebagai kunci pencarian
             }
         });
         if (!materi) return res.status(404).json({ msg: "Data tidak ditemukan" });
 
         const { name_materi, ket_materi, vid_materi } = req.body;
-        const img_materi = req.file ? req.file.path : materi.img_materi; // Update gambar jika ada
+        const img_materi = req.file ? req.file.path : materi.img_materi;  // Update gambar jika ada file baru
 
         if (req.role === "admin" || req.userId === materi.userId) {
             await Materi.update({ 
@@ -115,7 +114,7 @@ export const updateMateri = async (req, res) => {
                 vid_materi 
             }, {
                 where: {
-                    id: materi.id
+                    id: materi.id  // Gunakan id sebagai kunci update
                 }
             });
             res.status(200).json({ msg: "Materi updated successfully" });
@@ -131,7 +130,7 @@ export const deleteMateri = async (req, res) => {
     try {
         const materi = await Materi.findOne({
             where: {
-                uuid: req.params.id
+                id: req.params.id  // Gunakan id sebagai kunci pencarian
             }
         });
         if (!materi) return res.status(404).json({ msg: "Data tidak ditemukan" });
@@ -139,7 +138,7 @@ export const deleteMateri = async (req, res) => {
         if (req.role === "admin" || req.userId === materi.userId) {
             await Materi.destroy({
                 where: {
-                    id: materi.id
+                    id: materi.id  // Gunakan id sebagai kunci penghapusan
                 }
             });
             res.status(200).json({ msg: "Materi deleted successfully" });

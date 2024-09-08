@@ -7,13 +7,10 @@ import { Sequelize } from "sequelize";
 const { DataTypes } = Sequelize;
 
 const Tugas = db.define('tugas', {
-    uuid: {
-        type: DataTypes.STRING,
-        defaultValue: DataTypes.UUIDV4,
-        allowNull: false,
-        validate: {
-            notEmpty: true
-        }
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
     },
     userId: {
         type: DataTypes.INTEGER,

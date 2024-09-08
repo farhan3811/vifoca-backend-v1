@@ -10,6 +10,7 @@ export const getTugas = async (req, res) => {
     const search = req.query.search || '';
     const sortOrder = req.query.sortOrder || 'desc';
     const order = [['updatedat', sortOrder]];
+    
     try {
         const searchConditions = {
             [Op.or]: [
@@ -20,6 +21,7 @@ export const getTugas = async (req, res) => {
                 }
             ]
         };
+        
         const commonOptions = {
             include: [
                 {
@@ -37,6 +39,7 @@ export const getTugas = async (req, res) => {
         };
 
         const whereClause = req.role === "admin" ? searchConditions : { userId: req.userId, ...searchConditions };
+        
         const response = await Tugas.findAndCountAll({
             ...commonOptions,
             where: whereClause
@@ -56,7 +59,7 @@ export const getTugas = async (req, res) => {
 export const getTugasById = async (req, res) => {
     try {
         const tugas = await Tugas.findOne({
-            where: { uuid: req.params.id },
+            where: { id: req.params.id },  // Menggunakan id sebagai kunci
             include: [
                 {
                     model: Users,
@@ -85,33 +88,29 @@ export const getTugasById = async (req, res) => {
 export const createTugas = async (req, res) => {
     const { nama_soal, status_level, ket_assigment, deadline, materi_id } = req.body;
     const foto_tugas = req.file ? req.file.path : null;
-  
-    if (!nama_soal || !status_level || !ket_assigment || !deadline || !materi_id ) {
-      return res.status(400).json({ msg: "All fields are required" });
-    }
-  
-    try {
-      await Tugas.create({
-        nama_soal,
-        status_level,
-        foto_tugas,
-        ket_assigment,
-        deadline,
-        userId: req.userId,
-        materi_id
-      });
-      res.status(201).json({ msg: "Tugas berhasil dibuat" });
-    } catch (error) {
-      console.error("Error creating task:", error);
-      res.status(500).json({ msg: "Failed to create task", error: error.message });
-    }
-  };
 
+
+    try {
+        await Tugas.create({
+            nama_soal,
+            status_level,
+            foto_tugas,
+            ket_assigment,
+            deadline,
+            userId: req.userId,
+            materi_id
+        });
+        res.status(201).json({ msg: "Tugas berhasil dibuat" });
+    } catch (error) {
+        console.error("Error creating task:", error);
+        res.status(500).json({ msg: "Failed to create task", error: error.message });
+    }
+};
 
 export const updateTugas = async (req, res) => {
     try {
         const tugas = await Tugas.findOne({
-            where: { uuid: req.params.id }
+            where: { id: req.params.id }  // Menggunakan id
         });
 
         if (!tugas) return res.status(404).json({ msg: "Data tidak ditemukan" });
@@ -128,7 +127,7 @@ export const updateTugas = async (req, res) => {
                 deadline,
                 materi_id
             }, {
-                where: { uuid: req.params.id }
+                where: { id: req.params.id }  // Menggunakan id
             });
             res.status(200).json({ msg: "Tugas berhasil diperbarui" });
         } else {
@@ -143,14 +142,14 @@ export const updateTugas = async (req, res) => {
 export const deleteTugas = async (req, res) => {
     try {
         const tugas = await Tugas.findOne({
-            where: { uuid: req.params.id }
+            where: { id: req.params.id } 
         });
 
         if (!tugas) return res.status(404).json({ msg: "Data tidak ditemukan" });
 
         if (req.role === "admin" || req.userId === tugas.userId) {
             await Tugas.destroy({
-                where: { uuid: req.params.id }
+                where: { id: req.params.id }  // Menggunakan id
             });
             res.status(200).json({ msg: "Tugas berhasil dihapus" });
         } else {

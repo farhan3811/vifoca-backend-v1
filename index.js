@@ -47,7 +47,7 @@ app.use(UserRoute);
 app.use(AuthRoute);
 app.use(MateriRoute);
 app.use(TugasRoute);
-store.sync();
+// store.sync();
 app.listen(process.env.APP_PORT, () => {
     console.log('Server up and running...');
 });
