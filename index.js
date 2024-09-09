@@ -24,30 +24,48 @@ const sessionStore = SequelizeStore(session.Store);
 const store = new sessionStore({
     db: db
 });
-(async()=>{
-        await db.sync();
-    })();
+
+// (async () => {
+//     await db.sync();
+// })();
+
 app.use(session({
     secret: process.env.SESS_SECRET,
     resave: false,
     saveUninitialized: true,
     store: store,
     cookie: {
-        secure: 'auto'
+        secure: process.env.NODE_ENV === 'production'
     }
 }));
 
-app.use(cors({
+const corsOptions = {
     credentials: true,
-    origin: 'http://localhost:3000'
-}));
+    origin: (origin, callback) => {
+        console.log('CORS origin received:', origin);
+        if (process.env.NODE_ENV === 'production') {
+            if (origin === process.env.CORS_ORIGIN_PROD) {
+                callback(null, true);
+            } else {
+                callback(new Error('Not allowed by CORS'));
+            }
+        } else {
+            if (origin === process.env.CORS_ORIGIN_LOCAL || !origin) {
+                callback(null, true);
+            } else {
+                callback(new Error('Not allowed by CORS'));
+            }
+        }
+    }
+};
 
-app.use(express.json());
+app.use(cors(corsOptions));
+
 app.use(UserRoute);
 app.use(AuthRoute);
 app.use(MateriRoute);
 app.use(TugasRoute);
-// store.sync();
+
 app.listen(process.env.APP_PORT, () => {
-    console.log('Server up and running...');
+    console.log('Server up and running on port', process.env.APP_PORT);
 });

@@ -35,7 +35,8 @@ export const getTugas = async (req, res) => {
             ],
             limit,
             offset,
-            order
+            order,
+            attributes: { include: ['userId'] }  // Menambahkan userId ke hasil
         };
 
         const whereClause = req.role === "admin" ? searchConditions : { userId: req.userId, ...searchConditions };
@@ -47,7 +48,10 @@ export const getTugas = async (req, res) => {
 
         const totalPages = Math.ceil(response.count / limit);
         res.status(200).json({
-            tugas: response.rows,
+            tugas: response.rows.map(tugas => ({
+                ...tugas.toJSON(),
+                userId: tugas.userId // Menambahkan userId ke response
+            })),
             totalPages
         });
     } catch (error) {
@@ -59,7 +63,7 @@ export const getTugas = async (req, res) => {
 export const getTugasById = async (req, res) => {
     try {
         const tugas = await Tugas.findOne({
-            where: { id: req.params.id },  // Menggunakan id sebagai kunci
+            where: { id: req.params.id }, 
             include: [
                 {
                     model: Users,
@@ -75,7 +79,10 @@ export const getTugasById = async (req, res) => {
         if (!tugas) return res.status(404).json({ msg: "Data tidak ditemukan" });
 
         if (req.role === "admin" || req.userId === tugas.userId) {
-            res.status(200).json(tugas);
+            res.status(200).json({
+                ...tugas.toJSON(),
+                userId: tugas.userId // Menambahkan userId ke response
+            });
         } else {
             res.status(403).json({ msg: "Akses terlarang" });
         }
@@ -84,6 +91,7 @@ export const getTugasById = async (req, res) => {
         res.status(500).json({ msg: "Failed to fetch task by ID" });
     }
 };
+
 
 export const createTugas = async (req, res) => {
     const { nama_soal, status_level, ket_assigment, deadline, materi_id } = req.body;
