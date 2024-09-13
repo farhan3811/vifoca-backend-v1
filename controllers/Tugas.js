@@ -60,6 +60,32 @@ export const getTugas = async (req, res) => {
     }
 };
 
+export const getTugasByMateri = async (req, res) => {
+    const { materi_id } = req.params;
+    try {
+        const materi = await Materis.findByPk(materi_id);
+        if (!materi) {
+            return res.status(404).json({ message: "Materi not found" });
+        }
+
+        const tugas = await Tugas.findAll({
+            where: { materi_id },
+            include: [
+                {
+                    model: Users,
+                    attributes: ['name', 'email']
+                }
+            ]
+        });
+
+        res.status(200).json({ tugas });
+    } catch (error) {
+        console.error("Error fetching tasks for the selected materi:", error);
+        res.status(500).json({ message: "Failed to fetch tasks for the selected materi" });
+    }
+};
+
+
 export const getTugasById = async (req, res) => {
     try {
         const tugas = await Tugas.findOne({

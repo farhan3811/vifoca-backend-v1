@@ -10,10 +10,10 @@ import { verifyUser } from "../middleware/AuthUser.js";
 import upload from "../middleware/upload.js";
 
 const router = express.Router();
-router.get('/Materi', verifyUser, getMateri);
-router.get('/Materi/:id', verifyUser, getMateriById);
-router.post('/Materi', verifyUser, upload.single('img_materi'), createMateri);
-router.patch('/Materi/:id', verifyUser, upload.single('img_materi'), updateMateri);
-router.delete('/Materi/:id', verifyUser, deleteMateri);
+router.get('/materi', verifyUser, getMateri);
+router.get('/materi/:id', verifyUser, getMateriById);
+router.post('/materi', verifyUser, upload.single('img_materi'), createMateri);
+router.patch('/materi/:id', verifyUser, upload.single('img_materi'), updateMateri);
+router.delete('/materi/:id', verifyUser, deleteMateri);
 
 export default router;

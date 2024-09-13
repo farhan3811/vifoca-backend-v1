@@ -4,13 +4,15 @@ import {
     getTugasById,
     createTugas,
     updateTugas,
-    deleteTugas
+    deleteTugas,
+    getTugasByMateri
 } from "../controllers/Tugas.js";
 import { verifyUser } from "../middleware/AuthUser.js";
 import upload from "../middleware/upload.js";
 
 const router = express.Router();
 
+router.get('/materi/:materi_id/tugas',verifyUser, getTugasByMateri);
 router.get('/tugas',verifyUser, getTugas);
 router.get('/tugas/:id',verifyUser, getTugasById);
 router.post('/tugas',verifyUser,upload.single('foto_tugas'), createTugas);

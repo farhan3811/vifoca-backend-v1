@@ -39,17 +39,23 @@ export const getMateri = async (req, res) => {
 
 export const getMateriById = async (req, res) => {
     try {
+        // Ambil materi berdasarkan ID dari parameter request
         const materi = await Materi.findOne({
             where: {
-                id: req.params.id  // Gunakan id sebagai kunci pencarian
+                id: req.params.id 
             }
         });
+
+        // Jika materi tidak ditemukan, kirimkan response 404
         if (!materi) return res.status(404).json({ msg: "Data tidak ditemukan" });
 
         let response;
+
+        // Cek peran pengguna
         if (req.role === "admin") {
+
             response = await Materi.findOne({
-                attributes: ['id', 'name_materi', 'img_materi', 'ket_materi', 'vid_materi', 'updatedat'],  // Gunakan id
+                attributes: ['id', 'name_materi', 'img_materi', 'ket_materi', 'vid_materi', 'updatedat'],
                 where: {
                     id: materi.id
                 },
@@ -60,9 +66,9 @@ export const getMateriById = async (req, res) => {
             });
         } else {
             response = await Materi.findOne({
-                attributes: ['id', 'name_materi', 'img_materi', 'ket_materi', 'vid_materi', 'updatedat'],  // Gunakan id
+                attributes: ['id', 'name_materi', 'img_materi', 'ket_materi', 'vid_materi', 'updatedat'],
                 where: {
-                    [Op.and]: [{ id: materi.id }, { userId: req.userId }]
+                    id: materi.id
                 },
                 include: [{
                     model: User,
@@ -70,11 +76,13 @@ export const getMateriById = async (req, res) => {
                 }]
             });
         }
+
         res.status(200).json(response);
     } catch (error) {
         res.status(500).json({ msg: error.message });
     }
 };
+
 
 export const createMateri = async (req, res) => {
     const { name_materi, ket_materi, vid_materi } = req.body;
