@@ -25,9 +25,9 @@ const store = new sessionStore({
     db: db
 });
 
-// (async () => {
-//     await db.sync();
-// })();
+(async () => {
+    await db.sync();
+})();
 
 app.use(session({
     secret: process.env.SESS_SECRET,
@@ -42,31 +42,22 @@ app.use(session({
 const corsOptions = {
     credentials: true,
     origin: (origin, callback) => {
-        if (!origin) {
-            console.log('CORS: No origin in the request (possible internal request)');
-            callback(null, true);  // Izinkan request tanpa origin (server-side request)
-            return;
-        }
+        console.log('CORS origin received:', origin);
         if (process.env.NODE_ENV === 'production') {
             if (origin === process.env.CORS_ORIGIN_PROD) {
-                console.log('CORS in production: origin allowed');
                 callback(null, true);
             } else {
-                console.log('CORS in production: origin NOT allowed');
                 callback(new Error('Not allowed by CORS'));
             }
         } else {
             if (origin === process.env.CORS_ORIGIN_LOCAL || !origin) {
-                console.log('CORS in development: origin allowed');
                 callback(null, true);
             } else {
-                console.log('CORS in development: origin NOT allowed');
                 callback(new Error('Not allowed by CORS'));
             }
         }
     }
 };
-
 
 app.use(cors(corsOptions));
 
