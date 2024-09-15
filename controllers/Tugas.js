@@ -36,7 +36,7 @@ export const getTugas = async (req, res) => {
             limit,
             offset,
             order,
-            attributes: { include: ['userId'] }  // Menambahkan userId ke hasil
+            attributes: { include: ['userId'] }
         };
 
         const whereClause = req.role === "admin" ? searchConditions : { userId: req.userId, ...searchConditions };
@@ -50,7 +50,7 @@ export const getTugas = async (req, res) => {
         res.status(200).json({
             tugas: response.rows.map(tugas => ({
                 ...tugas.toJSON(),
-                userId: tugas.userId // Menambahkan userId ke response
+                userId: tugas.userId
             })),
             totalPages
         });
@@ -104,14 +104,10 @@ export const getTugasById = async (req, res) => {
 
         if (!tugas) return res.status(404).json({ msg: "Data tidak ditemukan" });
 
-        if (req.role === "admin" || req.userId === tugas.userId) {
-            res.status(200).json({
-                ...tugas.toJSON(),
-                userId: tugas.userId // Menambahkan userId ke response
-            });
-        } else {
-            res.status(403).json({ msg: "Akses terlarang" });
-        }
+        res.status(200).json({
+            ...tugas.toJSON(),
+            userId: tugas.userId
+        });
     } catch (error) {
         console.error("Error fetching task by ID:", error);
         res.status(500).json({ msg: "Failed to fetch task by ID" });
