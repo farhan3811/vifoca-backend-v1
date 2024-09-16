@@ -8,9 +8,9 @@ const { DataTypes } = Sequelize;
 
 const Tugas = db.define('tugas', {
     id: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
+        type: DataTypes.STRING,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true
     },
     userId: {
         type: DataTypes.INTEGER,
@@ -20,7 +20,7 @@ const Tugas = db.define('tugas', {
         }
     },
     materi_id: {
-        type: DataTypes.INTEGER
+        type: DataTypes.STRING
     },
     nama_soal: {
         type: DataTypes.STRING

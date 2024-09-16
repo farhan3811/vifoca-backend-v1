@@ -8,9 +8,9 @@ const { DataTypes } = Sequelize;
 
 const Penilaian = db.define('Penilaian', {
     id: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
+        type: DataTypes.STRING,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true
     },
     userId: {
         type: DataTypes.INTEGER,
@@ -20,7 +20,7 @@ const Penilaian = db.define('Penilaian', {
         }
     },
     tugas_id: {
-        type: DataTypes.INTEGER
+        type: DataTypes.STRING
     },
     form_penilaian: {
         type: DataTypes.STRING

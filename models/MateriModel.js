@@ -6,9 +6,9 @@ const { DataTypes } = Sequelize;
 
 const Materi = db.define('materi', {
     id: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
+        type: DataTypes.STRING,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true
     },
     name_materi: {
         type: DataTypes.STRING,
