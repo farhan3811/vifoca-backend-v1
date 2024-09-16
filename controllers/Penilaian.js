@@ -3,7 +3,6 @@ import Users from "../models/UserModel.js";
 import Tugas from "../models/TugasModel.js";
 import { Op } from "sequelize";
 
-// Get all penilaian with pagination, sorting, and search functionality
 export const getPenilaian = async (req, res) => {
   const page = parseInt(req.query.page, 10) || 1;
   const limit = Math.min(parseInt(req.query.limit, 10) || 5, 50); // Max limit to 50
@@ -36,7 +35,8 @@ export const getPenilaian = async (req, res) => {
         },
         {
           model: Tugas,
-          attributes: ['nama_soal', 'ket_assigment']
+          attributes: ['nama_soal', 'ket_assigment', 'materi_id'],
+          where: req.role === 'admin' ? {} : { userId: req.userId } // Cek jika user mahasiswa
         }
       ],
       limit,
@@ -45,8 +45,8 @@ export const getPenilaian = async (req, res) => {
       attributes: { include: ['userId'] }
     };
 
-    // Admin sees all records, others only see their own
-    const whereClause = req.role === "admin" ? searchConditions : { userId: req.userId, ...searchConditions };
+    // Jika admin, tampilkan semua penilaian; jika user, tampilkan hanya yang sesuai dengan userId dari tugas
+    const whereClause = req.role === "admin" ? searchConditions : { ...searchConditions };
 
     const response = await Penilaian.findAndCountAll({
       ...commonOptions,
@@ -66,8 +66,6 @@ export const getPenilaian = async (req, res) => {
     res.status(500).json({ msg: "Failed to fetch penilaian" });
   }
 };
-
-// Get a single penilaian by ID
 export const getPenilaianById = async (req, res) => {
   try {
     const penilaian = await Penilaian.findOne({
@@ -79,14 +77,15 @@ export const getPenilaianById = async (req, res) => {
         },
         {
           model: Tugas,
-          attributes: ['nama_soal', 'ket_assigment']
+          attributes: ['nama_soal', 'ket_assigment', 'materi_id'],
+          where: req.role === 'admin' ? {} : { userId: req.userId } // Cek tugas yang dibuat oleh user
         }
       ]
     });
 
     if (!penilaian) return res.status(404).json({ msg: "Data tidak ditemukan" });
 
-    if (req.role === "admin" || req.userId === penilaian.userId) {
+    if (req.role === "admin" || req.userId === penilaian.Tuga.userId) {
       res.status(200).json(penilaian);
     } else {
       res.status(403).json({ msg: "Akses terlarang" });
@@ -97,7 +96,7 @@ export const getPenilaianById = async (req, res) => {
   }
 };
 
-// Create a new penilaian
+
 export const createPenilaian = async (req, res) => {
   const { tugas_id, form_penilaian, answer, ket_penilaian } = req.body;
 
