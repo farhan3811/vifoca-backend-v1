@@ -39,19 +39,16 @@ export const getMateri = async (req, res) => {
 
 export const getMateriById = async (req, res) => {
     try {
-        // Ambil materi berdasarkan ID dari parameter request
         const materi = await Materi.findOne({
             where: {
                 id: req.params.id 
             }
         });
 
-        // Jika materi tidak ditemukan, kirimkan response 404
         if (!materi) return res.status(404).json({ msg: "Data tidak ditemukan" });
 
         let response;
 
-        // Cek peran pengguna
         if (req.role === "admin") {
 
             response = await Materi.findOne({
