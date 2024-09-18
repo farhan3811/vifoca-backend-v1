@@ -36,7 +36,7 @@ app.use(session({
     saveUninitialized: true,
     store: store,
     cookie: {
-        secure: process.env.NODE_ENV === 'production'
+        secure: false
     }
 }));
 
@@ -48,7 +48,7 @@ const corsOptions = {
             if (origin === process.env.CORS_ORIGIN_PROD) {
                 callback(null, true);
             } else {
-                callback(new Error('Not allowed by CORS'));
+                callback(new Error('Not allowed by CORS prod'));
             }
         } else {
             if (origin === process.env.CORS_ORIGIN_LOCAL || !origin) {
