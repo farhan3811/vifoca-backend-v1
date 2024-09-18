@@ -43,13 +43,8 @@ app.use(session({
 const corsOptions = {
     credentials: true,
     origin: (origin, callback) => {
-        console.log('CORS origin received:', origin);
         if (process.env.NODE_ENV === 'production') {
-            if (origin === process.env.CORS_ORIGIN_PROD) {
-                callback(null, true);
-            } else {
-                callback(new Error('Not allowed by CORS prod'));
-            }
+            callback(null, true); // Allow all origins in production
         } else {
             if (origin === process.env.CORS_ORIGIN_LOCAL || !origin) {
                 callback(null, true);
@@ -57,8 +52,12 @@ const corsOptions = {
                 callback(new Error('Not allowed by CORS'));
             }
         }
-    }
+    },
+    allowedHeaders: ['Content-Type', 'Authorization'], // Add allowed headers
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'], // Specify allowed methods
 };
+
+app.options('*', cors(corsOptions)); // Enable pre-flight requests for all routes
 
 app.use(cors(corsOptions));
 
