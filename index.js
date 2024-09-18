@@ -45,7 +45,11 @@ const corsOptions = {
     origin: (origin, callback) => {
         console.log('CORS origin received:', origin);
         if (process.env.NODE_ENV === 'production') {
-            callback(null, true);
+            if (origin === process.env.CORS_ORIGIN_PROD) {
+                callback(null, true);
+            } else {
+                callback(new Error('Not allowed by CORS prod'));
+            }
         } else {
             if (origin === process.env.CORS_ORIGIN_LOCAL || !origin) {
                 callback(null, true);
@@ -55,7 +59,6 @@ const corsOptions = {
         }
     }
 };
-
 
 app.use(cors(corsOptions));
 
