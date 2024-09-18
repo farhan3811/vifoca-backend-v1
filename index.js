@@ -36,31 +36,32 @@ app.use(session({
     saveUninitialized: true,
     store: store,
     cookie: {
-        secure: process.env.NODE_ENV === 'production'
+        secure: false
     }
 }));
 
-const corsOptions = {
-    credentials: true,
-    origin: (origin, callback) => {
-        console.log('CORS origin received:', origin);
-        if (process.env.NODE_ENV === 'production') {
-            if (origin === process.env.CORS_ORIGIN_PROD) {
-                callback(null, true);
-            } else {
-                callback(new Error('Not allowed by CORS'));
-            }
-        } else {
-            if (origin === process.env.CORS_ORIGIN_LOCAL || !origin) {
-                callback(null, true);
-            } else {
-                callback(new Error('Not allowed by CORS'));
-            }
-        }
-    }
-};
+// Remove or comment out the CORS configuration if frontend and backend are on the same domain
+// const corsOptions = {
+//     credentials: true,
+//     origin: (origin, callback) => {
+//         console.log('CORS origin received:', origin);
+//         if (process.env.NODE_ENV === 'production') {
+//             if (origin === process.env.CORS_ORIGIN_PROD) {
+//                 callback(null, true);
+//             } else {
+//                 callback(new Error('Not allowed by CORS'));
+//             }
+//         } else {
+//             if (origin === process.env.CORS_ORIGIN_LOCAL || !origin) {
+//                 callback(null, true);
+//             } else {
+//                 callback(new Error('Not allowed by CORS'));
+//             }
+//         }
+//     }
+// };
 
-app.use(cors(corsOptions));
+// app.use(cors(corsOptions));
 
 app.use(UserRoute);
 app.use(AuthRoute);
