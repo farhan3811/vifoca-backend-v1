@@ -1,7 +1,4 @@
 import User from "../models/UserModel.js";
-import cors from "cors";
-
-app.use(cors(corsOptions));
 
 export const verifyUser = async (req, res, next) => {
     try {
