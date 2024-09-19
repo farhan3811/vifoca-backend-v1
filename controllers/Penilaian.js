@@ -5,11 +5,11 @@ import { Op } from "sequelize";
 
 export const getPenilaian = async (req, res) => {
   const page = parseInt(req.query.page, 10) || 1;
-  const limit = Math.min(parseInt(req.query.limit, 10) || 5, 50); // Max limit to 50
+  const limit = Math.min(parseInt(req.query.limit, 10) || 5, 50); 
   const offset = (page - 1) * limit;
   const search = req.query.search || '';
   const sortOrder = req.query.sortOrder || 'desc';
-  const order = [['updatedat', sortOrder]]; // Use 'updatedat' as per model definition
+  const order = [['updatedat', sortOrder]];
 
   try {
     const searchConditions = {
@@ -35,7 +35,7 @@ export const getPenilaian = async (req, res) => {
         },
         {
           model: Tugas,
-          attributes: ['nama_soal', 'ket_assigment', 'materi_id'],
+          attributes: ['nama_soal', 'ket_assigment', 'materi_id', 'deadline'],
           where: req.role === 'admin' ? {} : { userId: req.userId } // Cek jika user mahasiswa
         }
       ],
@@ -77,7 +77,7 @@ export const getPenilaianById = async (req, res) => {
         },
         {
           model: Tugas,
-          attributes: ['nama_soal', 'ket_assigment', 'materi_id'],
+          attributes: ['nama_soal', 'ket_assigment', 'materi_id','deadline'],
           where: req.role === 'admin' ? {} : { userId: req.userId } // Cek tugas yang dibuat oleh user
         }
       ]
