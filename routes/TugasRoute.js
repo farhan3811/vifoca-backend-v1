@@ -12,11 +12,11 @@ import upload from "../middleware/upload.js";
 
 const router = express.Router();
 
-router.get('/api/materi/:materi_id/tugas',verifyUser, getTugasByMateri);
-router.get('/api/tugas',verifyUser, getTugas);
-router.get('/api/tugas/:id',verifyUser, getTugasById);
-router.post('/api/tugas',verifyUser,upload.single('foto_tugas'), createTugas);
-router.patch('/api/tugas/:id',verifyUser,upload.single('foto_tugas'), updateTugas);
-router.delete('/api/tugas/:id',verifyUser, deleteTugas);
+router.get('/materi/:materi_id/tugas',verifyUser, getTugasByMateri);
+router.get('/tugas',verifyUser, getTugas);
+router.get('/tugas/:id',verifyUser, getTugasById);
+router.post('/tugas',verifyUser,upload.single('foto_tugas'), createTugas);
+router.patch('/tugas/:id',verifyUser,upload.single('foto_tugas'), updateTugas);
+router.delete('/tugas/:id',verifyUser, deleteTugas);
 
 export default router;

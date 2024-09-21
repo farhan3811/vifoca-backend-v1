@@ -62,7 +62,11 @@ const Users = db.define('users', {
         validate: {
             notEmpty: true
         }
-    }
+    },
+    isApproved: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+      }
 }, {
     freezeTableName: true,
     timestamps: true,

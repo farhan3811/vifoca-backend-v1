@@ -9,7 +9,7 @@ export const getPenilaian = async (req, res) => {
   const offset = (page - 1) * limit;
   const search = req.query.search || '';
   const sortOrder = req.query.sortOrder || 'desc';
-  const order = [['updatedat', sortOrder]];
+  const order = [['updatedat', sortOrder]]; // Correct case for 'updatedAt'
 
   try {
     const searchConditions = {
@@ -35,8 +35,7 @@ export const getPenilaian = async (req, res) => {
         },
         {
           model: Tugas,
-          attributes: ['nama_soal', 'ket_assigment', 'materi_id', 'deadline'],
-          where: req.role === 'admin' ? {} : { userId: req.userId } // Cek jika user mahasiswa
+          attributes: ['nama_soal', 'ket_assigment', 'materi_id', 'deadline']
         }
       ],
       limit,
@@ -45,8 +44,13 @@ export const getPenilaian = async (req, res) => {
       attributes: { include: ['userId'] }
     };
 
-    // Jika admin, tampilkan semua penilaian; jika user, tampilkan hanya yang sesuai dengan userId dari tugas
-    const whereClause = req.role === "admin" ? searchConditions : { ...searchConditions };
+    // Define where clause based on user role
+    const whereClause = req.role === "admin" 
+      ? searchConditions // Admin sees all
+      : {
+          ...searchConditions,
+          userId: req.userId // Mahasiswa sees only their own penilaian
+        };
 
     const response = await Penilaian.findAndCountAll({
       ...commonOptions,
@@ -66,6 +70,7 @@ export const getPenilaian = async (req, res) => {
     res.status(500).json({ msg: "Failed to fetch penilaian" });
   }
 };
+
 export const getPenilaianById = async (req, res) => {
   try {
     const penilaian = await Penilaian.findOne({
@@ -77,15 +82,15 @@ export const getPenilaianById = async (req, res) => {
         },
         {
           model: Tugas,
-          attributes: ['nama_soal', 'ket_assigment', 'materi_id','deadline'],
-          where: req.role === 'admin' ? {} : { userId: req.userId } // Cek tugas yang dibuat oleh user
+          attributes: ['nama_soal', 'ket_assigment', 'materi_id', 'deadline']
         }
       ]
     });
 
     if (!penilaian) return res.status(404).json({ msg: "Data tidak ditemukan" });
 
-    if (req.role === "admin" || req.userId === penilaian.Tuga.userId) {
+    // Check access based on role
+    if (req.role === "admin" || req.userId === penilaian.userId) {
       res.status(200).json(penilaian);
     } else {
       res.status(403).json({ msg: "Akses terlarang" });
@@ -96,6 +101,7 @@ export const getPenilaianById = async (req, res) => {
   }
 };
 
+// Other functions (create, update, delete) remain unchanged
 
 export const createPenilaian = async (req, res) => {
   const { tugas_id, form_penilaian, answer, ket_penilaian } = req.body;

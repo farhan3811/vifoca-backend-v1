@@ -8,22 +8,19 @@ export const getMateri = async (req, res) => {
     const offset = (page - 1) * limit;
     const search = req.query.search || '';
     const sortOrder = req.query.sortOrder || "desc";
+    const order = [['updatedat', sortOrder]];
 
     try {
-        const validSortOrders = ["asc", "desc"];
-        const orderDirection = validSortOrders.includes(sortOrder) ? sortOrder : "desc";
-        const order = ["updatedat", orderDirection];
-        console.log("Order:", order);
+        const userWhereClause = {
+            name: {
+                [Op.iLike]: `%${search}%`
+            }
+        };
         const response = await Materi.findAndCountAll({
             limit,
             offset,
             order,
-            attributes: ['id', 'name_materi', 'img_materi', 'ket_materi', 'vid_materi', 'updatedat'],
-            where: {
-                name_materi: {
-                    [Op.iLike]: `%${search}%`
-                }
-            },
+            attributes: ['id', 'name_materi', 'img_materi', 'ket_materi', 'vid_materi', 'updatedat'],  // Gunakan id sebagai pengenal
             include: [{
                 model: User,
                 attributes: ['name', 'email'],

@@ -23,7 +23,7 @@ export const getUsers = async (req, res) => {
             attributes: ['uuid', 'name', 'prodi', 'nim', 'email', 'avatar', 'createdat', 'updatedat', 'role'],
             where: {
                 name: {
-                    [Op.iLike]: `%${search}%` // Pencarian berdasarkan nama
+                    [Op.iLike]: `%${search}%`
                 }
             },
         });
@@ -34,7 +34,7 @@ export const getUsers = async (req, res) => {
             totalPages
         });
     } catch (error) {
-        console.error("Error fetching users:", error.message); // Log kesalahan ke konsol
+        console.error("Error fetching users:", error.message);
         res.status(500).json({ msg: error.message });
     }
 };
@@ -55,7 +55,6 @@ export const getUserById = async (req, res) => {
 };
 
 export const createUser = async (req, res) => {
-    // Validasi input
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
@@ -64,22 +63,15 @@ export const createUser = async (req, res) => {
     const { name, prodi, nim, email, password, role, avatar, biodata_id } = req.body;
 
     try {
-        // Cek apakah NIM sudah ada
         const existingUserNim = await User.findOne({ where: { nim } });
         if (existingUserNim) {
             return res.status(400).json({ msg: "NIM sudah digunakan" });
         }
-
-        // Cek apakah email sudah ada
         const existingUserEmail = await User.findOne({ where: { email } });
         if (existingUserEmail) {
             return res.status(400).json({ msg: "Email sudah digunakan" });
         }
-
-        // Hash password sebelum menyimpan
         const hashedPassword = await argon2.hash(password);
-
-        // Buat pengguna baru
         const newUser = await User.create({
             name,
             prodi,
@@ -107,26 +99,20 @@ export const updateUser = async (req, res) => {
     if (!user) return res.status(404).json({ msg: "User tidak ditemukan" });
 
     const { name, prodi, nim, email, password, confPassword, role } = req.body;
-
-    // Validasi bahwa nim adalah angka
     const parsedNim = parseInt(nim, 10);
     if (isNaN(parsedNim)) return res.status(400).json({ msg: "NIM harus berupa angka yang valid" });
-
-    // Validasi bahwa email tidak digunakan oleh pengguna lain
     const existingUserEmail = await User.findOne({
         where: {
             email,
             uuid: {
-                [Op.ne]: user.uuid // Pastikan email tidak digunakan oleh pengguna lain, kecuali pengguna yang sedang di-update
+                [Op.ne]: user.uuid
             }
         }
     });
     if (existingUserEmail) return res.status(400).json({ msg: "Email sudah digunakan oleh pengguna lain" });
-
-    // Hanya hash password jika password baru diberikan
     if (password && password !== "" && password !== null) {
         if (password !== confPassword) return res.status(400).json({ msg: "Password dan Confirm Password tidak cocok" });
-        hashPassword = await argon2.hash(password); // Hash password baru
+        hashPassword = await argon2.hash(password);
     }
 
     try {
@@ -136,7 +122,7 @@ export const updateUser = async (req, res) => {
             nim: parsedNim,
             email,
             role,
-            updatedat: new Date() // Pastikan tanggal pembaruan diupdate
+            updatedat: new Date()
         }, {
             where: {
                 uuid: user.uuid
@@ -167,3 +153,28 @@ export const deleteUser = async (req, res) => {
         res.status(400).json({ msg: error.message });
     }
 };
+export const approveUser = async (req, res) => {
+    const { userId } = req.params;
+  
+    try {
+      const user = await User.findByPk(userId);
+      if (!user) return res.status(404).json({ msg: "Pengguna tidak ditemukan" });
+  
+      user.isApproved = true;
+      await user.save();
+  
+      res.status(200).json({ msg: "Pengguna berhasil di-approve" });
+    } catch (error) {
+      res.status(500).json({ msg: error.message });
+    }
+  };
+  
+  export const getPendingUsers = async (req, res) => {
+    try {
+      const users = await User.findAll({ where: { isApproved: false } });
+      res.status(200).json(users);
+    } catch (error) {
+      res.status(500).json({ msg: error.message });
+    }
+  };
+  

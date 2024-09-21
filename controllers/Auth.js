@@ -9,6 +9,7 @@ export const Login = async (req, res) => {
             nim: nim
         }
     });
+    if (!user.isApproved) return res.status(403).json({ msg: "Akun Anda belum di-approve oleh admin" });
     if (!user) return res.status(404).json({msg: "User tidak ditemukan"});
     const match = await argon2.verify(user.password, req.body.password);
     if (!match) return res.status(400).json({msg: "Password salah"});
@@ -20,7 +21,26 @@ export const Login = async (req, res) => {
     
     res.status(200).json({uuid, name, nim: nimUser, role});
 }
-
+export const register = async (req, res) => {
+    const { name, email,nim, password, role } = req.body;
+    const userExists = await User.findOne({ where: { email } });
+    if (userExists) return res.status(400).json({ msg: "Email sudah digunakan" });
+    const hashedPassword = await argon2.hash(password);
+    try {
+      await User.create({
+        name,
+        email,
+        nim,
+        password: hashedPassword,
+        role,
+        isApproved: false
+      });
+  
+      res.status(201).json({ msg: "Registrasi berhasil, tunggu approval dari admin" });
+    } catch (error) {
+      res.status(500).json({ msg: error.message });
+    }
+  };
 export const Me = async (req, res) => {
     if (!req.session.userId) {
         return res.status(401).json({msg: "Mohon login ke akun Anda!"});
