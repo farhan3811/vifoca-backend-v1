@@ -20,7 +20,7 @@ export const getUsers = async (req, res) => {
             limit,
             offset,
             order: [order],
-            attributes: ['uuid', 'name', 'prodi', 'nim', 'email', 'avatar', 'createdat', 'updatedat', 'role'],
+            attributes: ['uuid', 'name', 'prodi', 'nim', 'email', 'avatar', 'createdat', 'updatedat', 'role', 'isApproved'],
             where: {
                 name: {
                     [Op.iLike]: `%${search}%`
@@ -157,7 +157,7 @@ export const approveUser = async (req, res) => {
     const { userId } = req.params;
   
     try {
-      const user = await User.findByPk(userId);
+        const user = await User.findOne({ where: { uuid: userId } }); 
       if (!user) return res.status(404).json({ msg: "Pengguna tidak ditemukan" });
   
       user.isApproved = true;
@@ -165,16 +165,45 @@ export const approveUser = async (req, res) => {
   
       res.status(200).json({ msg: "Pengguna berhasil di-approve" });
     } catch (error) {
+      console.error("Error approving user:", error);
       res.status(500).json({ msg: error.message });
     }
   };
   
   export const getPendingUsers = async (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = 5;
+    const offset = (page - 1) * limit;
+    const search = req.query.search || '';
+    const sortOrder = req.query.sortOrder || "desc";
+
     try {
-      const users = await User.findAll({ where: { isApproved: false } });
-      res.status(200).json(users);
+        const validSortOrders = ["asc", "desc"];
+        const orderDirection = validSortOrders.includes(sortOrder) ? sortOrder : "desc";
+        const order = ["updatedat", orderDirection];
+
+        const response = await User.findAndCountAll({
+            limit,
+            offset,
+            order: [order],
+            attributes: ['uuid', 'name', 'prodi', 'nim', 'email', 'avatar', 'createdat', 'updatedat', 'role'],
+            where: {
+                isApproved: false,
+                name: {
+                    [Op.iLike]: `%${search}%`
+                }
+            },
+        });
+
+        const totalPages = Math.ceil(response.count / limit);
+        res.status(200).json({
+            pendingUsers: response.rows,
+            totalPages
+        });
     } catch (error) {
-      res.status(500).json({ msg: error.message });
+        console.error("Error fetching pending users:", error.message);
+        res.status(500).json({ msg: error.message });
     }
-  };
+};
+
   
