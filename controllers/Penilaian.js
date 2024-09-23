@@ -35,7 +35,7 @@ export const getPenilaian = async (req, res) => {
         },
         {
           model: Tugas,
-          attributes: ['nama_soal', 'ket_assigment', 'materi_id', 'deadline']
+          attributes: ['nama_soal', 'ket_assigment', 'materi_id', 'deadline', 'userId']
         }
       ],
       limit,
@@ -49,7 +49,10 @@ export const getPenilaian = async (req, res) => {
       ? searchConditions // Admin sees all
       : {
           ...searchConditions,
-          userId: req.userId // Mahasiswa sees only their own penilaian
+          [Op.or]: [
+            { userId: req.userId }, // Mahasiswa sees only their own penilaian
+            { '$tuga.userId$': req.userId } // Mahasiswa can see penilaian for Tugas they created
+          ]
         };
 
     const response = await Penilaian.findAndCountAll({
@@ -82,7 +85,7 @@ export const getPenilaianById = async (req, res) => {
         },
         {
           model: Tugas,
-          attributes: ['nama_soal', 'ket_assigment', 'materi_id', 'deadline']
+          attributes: ['nama_soal', 'ket_assigment', 'materi_id', 'deadline', 'userId']
         }
       ]
     });
@@ -90,7 +93,7 @@ export const getPenilaianById = async (req, res) => {
     if (!penilaian) return res.status(404).json({ msg: "Data tidak ditemukan" });
 
     // Check access based on role
-    if (req.role === "admin" || req.userId === penilaian.userId) {
+    if (req.role === "admin" || req.userId === penilaian.userId || req.userId === penilaian.Tugas.userId) {
       res.status(200).json(penilaian);
     } else {
       res.status(403).json({ msg: "Akses terlarang" });
@@ -101,8 +104,7 @@ export const getPenilaianById = async (req, res) => {
   }
 };
 
-// Other functions (create, update, delete) remain unchanged
-
+// Create a new penilaian
 export const createPenilaian = async (req, res) => {
   const { tugas_id, form_penilaian, answer, ket_penilaian } = req.body;
 
@@ -129,14 +131,23 @@ export const createPenilaian = async (req, res) => {
 export const updatePenilaian = async (req, res) => {
   try {
     const penilaian = await Penilaian.findOne({
-      where: { id: req.params.id }
+      where: { id: req.params.id },
+      include: [
+        {
+          model: Users,
+          attributes: ['name', 'email']
+        },
+        {
+          model: Tugas,
+          attributes: ['nama_soal', 'ket_assigment', 'materi_id', 'deadline', 'userId']
+        }
+      ]
     });
 
     if (!penilaian) return res.status(404).json({ msg: "Data tidak ditemukan" });
 
     const { form_penilaian, answer, ket_penilaian } = req.body;
-
-    if (req.role === "admin" || req.userId === penilaian.userId) {
+    if (req.role === "admin" || req.userId === penilaian.userId || req.userId === penilaian.Tugas.userId) {
       await Penilaian.update({
         form_penilaian,
         answer,
@@ -164,7 +175,7 @@ export const deletePenilaian = async (req, res) => {
 
     if (!penilaian) return res.status(404).json({ msg: "Data tidak ditemukan" });
 
-    if (req.role === "admin" || req.userId === penilaian.userId) {
+    if (req.role === "admin" || req.userId === penilaian.userId || req.userId === penilaian.Tugas.userId) {
       await Penilaian.destroy({
         where: { id: req.params.id }
       });
