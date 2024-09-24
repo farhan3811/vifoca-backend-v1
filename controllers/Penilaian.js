@@ -9,7 +9,7 @@ export const getPenilaian = async (req, res) => {
   const offset = (page - 1) * limit;
   const search = req.query.search || '';
   const sortOrder = req.query.sortOrder || 'desc';
-  const order = [['updatedat', sortOrder]]; // Correct case for 'updatedAt'
+  const order = [['updatedat', sortOrder]];
 
   try {
     const searchConditions = {
@@ -43,15 +43,13 @@ export const getPenilaian = async (req, res) => {
       order,
       attributes: { include: ['userId'] }
     };
-
-    // Define where clause based on user role
     const whereClause = req.role === "admin" 
-      ? searchConditions // Admin sees all
+      ? searchConditions 
       : {
           ...searchConditions,
           [Op.or]: [
-            { userId: req.userId }, // Mahasiswa sees only their own penilaian
-            { '$tuga.userId$': req.userId } // Mahasiswa can see penilaian for Tugas they created
+            { userId: req.userId },
+            { '$tuga.userId$': req.userId } 
           ]
         };
 
