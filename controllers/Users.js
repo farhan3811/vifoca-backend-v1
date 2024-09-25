@@ -5,7 +5,7 @@ import { validationResult } from "express-validator";
 
 export const getUsers = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
-    const limit = 5;
+    const limit = 10;
     const offset = (page - 1) * limit;
     const search = req.query.search || '';
     const sortOrder = req.query.sortOrder || "desc";
@@ -20,7 +20,7 @@ export const getUsers = async (req, res) => {
             limit,
             offset,
             order: [order],
-            attributes: ['uuid', 'name', 'prodi', 'nim', 'email', 'avatar', 'createdat', 'updatedat', 'role', 'isApproved'],
+            attributes: ['uuid', 'name', 'prodi', 'nim', 'email','nomorhp','tgllahir', 'avatar', 'createdat', 'updatedat', 'role', 'isApproved'],
             where: {
                 name: {
                     [Op.iLike]: `%${search}%`
@@ -42,7 +42,7 @@ export const getUsers = async (req, res) => {
 export const getUserById = async (req, res) => {
     try {
         const response = await User.findOne({
-            attributes: ['uuid', 'name', 'prodi', 'nim', 'email', 'avatar', 'createdat', 'updatedat', 'role'],
+            attributes: ['uuid', 'name', 'prodi', 'nim', 'email','nomorhp','tgllahir', 'avatar', 'createdat', 'updatedat', 'role'],
             where: {
                 uuid: req.params.id
             }
@@ -60,7 +60,8 @@ export const createUser = async (req, res) => {
         return res.status(400).json({ errors: errors.array() });
     }
 
-    const { name, prodi, nim, email, password, role, avatar, biodata_id } = req.body;
+    const { name, prodi, nim, email, nomorhp, tgllahir, password, role, biodata_id } = req.body;
+    const avatar = req.file ? req.file.path : null;
 
     try {
         const existingUserNim = await User.findOne({ where: { nim } });
@@ -77,9 +78,12 @@ export const createUser = async (req, res) => {
             prodi,
             nim,
             email,
+            nomorhp,
+            tgllahir,
             password: hashedPassword,
             role,
             avatar,
+            isApproved: true,
             biodata_id
         });
 
@@ -98,9 +102,9 @@ export const updateUser = async (req, res) => {
 
     if (!user) return res.status(404).json({ msg: "User tidak ditemukan" });
 
-    const { name, prodi, nim, email, password, confPassword, role } = req.body;
+    const { name, prodi, nim, email, nomorhp, tgllahir, password, confPassword, role } = req.body;
+    const avatar = req.file ? req.file.path : user.avatar;
     const parsedNim = parseInt(nim, 10);
-    if (isNaN(parsedNim)) return res.status(400).json({ msg: "NIM harus berupa angka yang valid" });
     const existingUserEmail = await User.findOne({
         where: {
             email,
@@ -121,7 +125,10 @@ export const updateUser = async (req, res) => {
             prodi,
             nim: parsedNim,
             email,
+            nomorhp,
+            tgllahir,
             role,
+            avatar,
             updatedat: new Date()
         }, {
             where: {

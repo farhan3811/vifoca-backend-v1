@@ -39,9 +39,7 @@ app.use(session({
     saveUninitialized: true,
     store: store,
     cookie: {
-        secure: process.env.NODE_ENV === 'production',
-        httpOnly: true,
-        sameSite: 'lax'
+        secure: false
     }
 }));
 

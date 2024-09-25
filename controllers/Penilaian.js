@@ -31,7 +31,7 @@ export const getPenilaian = async (req, res) => {
       include: [
         {
           model: Users,
-          attributes: ['name', 'email']
+          attributes: ['name', 'email','role']
         },
         {
           model: Tugas,
@@ -79,7 +79,7 @@ export const getPenilaianById = async (req, res) => {
       include: [
         {
           model: Users,
-          attributes: ['name', 'email']
+          attributes: ['name', 'email','role']
         },
         {
           model: Tugas,
@@ -91,7 +91,7 @@ export const getPenilaianById = async (req, res) => {
     if (!penilaian) return res.status(404).json({ msg: "Data tidak ditemukan" });
 
     // Check access based on role
-    if (req.role === "admin" || req.userId === penilaian.userId || req.userId === penilaian.Tugas.userId) {
+    if (req.role === "admin" || req.userId === penilaian.userId || req.userId === penilaian.tuga.userId) {
       res.status(200).json(penilaian);
     } else {
       res.status(403).json({ msg: "Akses terlarang" });
@@ -145,7 +145,7 @@ export const updatePenilaian = async (req, res) => {
     if (!penilaian) return res.status(404).json({ msg: "Data tidak ditemukan" });
 
     const { form_penilaian, answer, ket_penilaian } = req.body;
-    if (req.role === "admin" || req.userId === penilaian.userId || req.userId === penilaian.Tugas.userId) {
+    if (req.role === "admin" || req.userId === penilaian.userId || req.userId === penilaian.tuga.userId) {
       await Penilaian.update({
         form_penilaian,
         answer,
