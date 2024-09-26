@@ -13,7 +13,7 @@ export const getMateri = async (req, res) => {
     try {
         const userWhereClause = {
             name: {
-                [Op.iLike]: `%${search}%`
+                [Op.like]: `%${search}%`  // Gunakan LIKE untuk MySQL
             }
         };
         const response = await Materi.findAndCountAll({
@@ -36,6 +36,7 @@ export const getMateri = async (req, res) => {
         res.status(500).json({ msg: error.message });
     }
 };
+
 
 export const getMateriById = async (req, res) => {
     try {

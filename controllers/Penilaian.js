@@ -16,12 +16,12 @@ export const getPenilaian = async (req, res) => {
       [Op.or]: [
         {
           form_penilaian: {
-            [Op.iLike]: `%${search}%`
+            [Op.like]: `%${search}%`
           }
         },
         {
           ket_penilaian: {
-            [Op.iLike]: `%${search}%`
+            [Op.like]: `%${search}%`
           }
         }
       ]
@@ -102,7 +102,6 @@ export const getPenilaianById = async (req, res) => {
   }
 };
 
-// Create a new penilaian
 export const createPenilaian = async (req, res) => {
   const { tugas_id, form_penilaian, answer, ket_penilaian } = req.body;
 
@@ -115,7 +114,7 @@ export const createPenilaian = async (req, res) => {
       form_penilaian,
       answer,
       ket_penilaian,
-      userId: req.userId // Associate penilaian with the current user
+      userId: req.userId
     });
 
     res.status(201).json({ msg: "Penilaian berhasil dibuat" });

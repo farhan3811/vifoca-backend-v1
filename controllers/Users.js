@@ -23,7 +23,7 @@ export const getUsers = async (req, res) => {
             attributes: ['uuid', 'name', 'prodi', 'nim', 'email','nomorhp','tgllahir', 'avatar', 'createdat', 'updatedat', 'role', 'isApproved'],
             where: {
                 name: {
-                    [Op.iLike]: `%${search}%`
+                    [Op.like]: `%${search}%`
                 }
             },
         });
@@ -197,7 +197,7 @@ export const approveUser = async (req, res) => {
             where: {
                 isApproved: false,
                 name: {
-                    [Op.iLike]: `%${search}%`
+                    [Op.LIKE]: `%${search}%`
                 }
             },
         });

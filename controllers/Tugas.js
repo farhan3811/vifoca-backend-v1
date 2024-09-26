@@ -16,7 +16,7 @@ export const getTugas = async (req, res) => {
             [Op.or]: [
                 {
                     nama_soal: {
-                        [Op.iLike]: `%${search}%`
+                        [Op.like]: `%${search}%`
                     }
                 }
             ]

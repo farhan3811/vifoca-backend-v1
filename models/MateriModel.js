@@ -41,8 +41,8 @@ const Materi = db.define('materi', {
 }, {
     freezeTableName: true,
     timestamps: true,
-    createdAt: 'createdat',  // Map kolom createdAt ke createdat
-    updatedAt: 'updatedat'   // Map kolom updatedAt ke updatedat
+    createdAt: 'createdat',
+    updatedAt: 'updatedat'
 });
 
 Users.hasMany(Materi);
