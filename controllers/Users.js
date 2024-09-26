@@ -197,7 +197,7 @@ export const approveUser = async (req, res) => {
             where: {
                 isApproved: false,
                 name: {
-                    [Op.LIKE]: `%${search}%`
+                    [Op.like]: `%${search}%`
                 }
             },
         });
