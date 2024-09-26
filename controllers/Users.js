@@ -94,52 +94,50 @@ export const createUser = async (req, res) => {
 };
 
 export const updateUser = async (req, res) => {
-    const user = await User.findOne({
-        where: {
-            uuid: req.params.id
-        }
-    });
-
-    if (!user) return res.status(404).json({ msg: "User tidak ditemukan" });
-
-    const { name, prodi, nim, email, nomorhp, tgllahir, password, confPassword, role } = req.body;
-    const avatar = req.file ? req.file.path : user.avatar;
-    const parsedNim = parseInt(nim, 10);
-    const existingUserEmail = await User.findOne({
-        where: {
-            email,
-            uuid: {
-                [Op.ne]: user.uuid
-            }
-        }
-    });
-    if (existingUserEmail) return res.status(400).json({ msg: "Email sudah digunakan oleh pengguna lain" });
-    if (password && password !== "" && password !== null) {
-        if (password !== confPassword) return res.status(400).json({ msg: "Password dan Confirm Password tidak cocok" });
-        hashPassword = await argon2.hash(password);
-    }
-
     try {
-        await User.update({
+        const user = await User.findOne({
+            where: { uuid: req.params.id }
+        });
+
+        if (!user) return res.status(404).json({ msg: "User tidak ditemukan" });
+
+        const { name, prodi, nim, email, nomorhp, tgllahir, password, role } = req.body; // Hapus confPassword
+        const avatar = req.file ? req.file.path : user.avatar;
+        const parsedNim = parseInt(nim, 10);
+        const existingUserEmail = await User.findOne({
+            where: {
+                email,
+                uuid: { [Op.ne]: user.uuid }
+            }
+        });
+
+        if (existingUserEmail) return res.status(400).json({ msg: "Email sudah digunakan oleh pengguna lain" });
+
+        const updateData = {
             name,
             prodi,
             nim: parsedNim,
             email,
             nomorhp,
             tgllahir,
-            role,
             avatar,
+            role,
             updatedat: new Date()
-        }, {
-            where: {
-                uuid: user.uuid
-            }
+        };
+        if (password) {
+            updateData.password = await argon2.hash(password);
+        }
+        await User.update(updateData, {
+            where: { uuid: user.uuid }
         });
+
         res.status(200).json({ msg: "User Updated" });
     } catch (error) {
-        res.status(400).json({ msg: error.message });
+        console.error(error);
+        res.status(500).json({ msg: "Terjadi kesalahan saat memperbarui pengguna." });
     }
 };
+
 
 export const deleteUser = async (req, res) => {
     const user = await User.findOne({
