@@ -14,8 +14,6 @@ export const getUsers = async (req, res) => {
         const validSortOrders = ["asc", "desc"];
         const orderDirection = validSortOrders.includes(sortOrder) ? sortOrder : "desc";
         const order = ["updatedat", orderDirection];
-        console.log("Order:", order);
-
         const response = await User.findAndCountAll({
             limit,
             offset,

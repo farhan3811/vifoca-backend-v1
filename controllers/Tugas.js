@@ -8,7 +8,7 @@ export const getTugas = async (req, res) => {
     const limit = Math.min(parseInt(req.query.limit, 10) || 5, 50); // Max limit to 50
     const offset = (page - 1) * limit;
     const search = req.query.search || '';
-    const sortOrder = req.query.sortOrder || 'desc';
+    const sortOrder = req.query.sortOrder === 'asc' ? 'asc' : 'desc'; // Validasi sortOrder
     const order = [['updatedat', sortOrder]];
     
     try {
@@ -59,6 +59,7 @@ export const getTugas = async (req, res) => {
         res.status(500).json({ msg: "Failed to fetch tasks" });
     }
 };
+
 
 export const getTugasByMateri = async (req, res) => {
     const { materi_id } = req.params;
