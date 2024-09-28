@@ -24,7 +24,7 @@ const Users = db.define('users', {
         type: DataTypes.STRING
     },
     tgllahir: {
-        type: DataTypes.DATE
+        type: DataTypes.DATEONLY
     },
     nim: {
         type: DataTypes.BIGINT,

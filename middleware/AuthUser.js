@@ -17,6 +17,7 @@ export const verifyUser = async (req, res, next) => {
         req.userId = user.id;
         req.role = user.role;
         req.avatar = user.avatar;
+        console.log('User Info:', req.user);
         next();
     } catch (error) {
         res.status(500).json({ msg: error.message });
