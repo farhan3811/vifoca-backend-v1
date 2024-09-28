@@ -9,6 +9,7 @@ import AuthRoute from "./routes/AuthRoute.js";
 import MateriRoute from "./routes/MateriRoute.js";
 import TugasRoute from "./routes/TugasRoute.js";
 import PenilaianRoute from "./routes/PenilaianRoute.js";
+import DashboardRoute from "./routes/DashboardRoute.js";
 import path from "path";
 import { fileURLToPath } from 'url';
 
@@ -68,6 +69,7 @@ app.use('/api',AuthRoute);
 app.use('/api',MateriRoute);
 app.use('/api',TugasRoute);
 app.use('/api',PenilaianRoute);
+app.use('/api',DashboardRoute);
 
 app.listen(process.env.APP_PORT, () => {
     console.log('Server up and running on port', process.env.APP_PORT);
