@@ -18,7 +18,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 app.use('/api/uploads', express.static(path.join(__dirname, 'uploads')));
-const payloadLimit = '10mb'; // Misalnya, atur menjadi 10 megabyte
+const payloadLimit = '10mb';
 app.use(express.json({ limit: payloadLimit }));
 app.use(express.urlencoded({ extended: true, limit: payloadLimit }));
 

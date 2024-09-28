@@ -66,7 +66,15 @@ const Users = db.define('users', {
     isApproved: {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
-      }
+      },
+      resetToken: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    resetTokenExpiration: {
+        type: DataTypes.DATE,
+        allowNull: true
+    }
 }, {
     freezeTableName: true,
     timestamps: true,
