@@ -6,7 +6,8 @@ import {
     updateUser,
     deleteUser,
     approveUser,
-    getPendingUsers
+    getPendingUsers,
+    updateUserPassword
 
 } from "../controllers/Users.js";
 import { verifyUser, adminOnly } from "../middleware/AuthUser.js";
@@ -21,5 +22,6 @@ router.get('/users/:id', verifyUser, getUserById);
 router.post('/users',verifyUser,adminOnly,upload.single('avatar'), createUser);
 router.patch('/users/:id', verifyUser,upload.single('avatar'), updateUser);
 router.delete('/users/:id', verifyUser, adminOnly, deleteUser);
+router.put('/password/:id', verifyUser,updateUserPassword);
 
 export default router;

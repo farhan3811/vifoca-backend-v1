@@ -209,4 +209,24 @@ export const approveUser = async (req, res) => {
     }
 };
 
-  
+export const updateUserPassword = async (req, res) => {
+    try {
+        const userId = req.params.id;
+        const { oldPassword, newPassword } = req.body;
+        const user = await User.findOne({ where: { uuid: userId } });
+        if (!user) return res.status(404).json({ msg: "User tidak ditemukan" });
+
+        const passwordMatch = await argon2.verify(user.password, oldPassword);
+        if (!passwordMatch) {
+            return res.status(400).json({ msg: "Password lama salah" });
+        }
+
+        user.password = await argon2.hash(newPassword);
+        await user.save();
+
+        res.status(200).json({ msg: "Password berhasil diperbarui" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ msg: "Terjadi kesalahan saat memperbarui password." });
+    }
+};
