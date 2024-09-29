@@ -65,7 +65,7 @@ export const getDashboardData = async (req, res) => {
         totalPenilaian,
         totalUser,
         tugasDetails,
-        tugasPerHari, // Menambahkan data tugas per hari ke response
+        tugasPerHari,
       });
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
