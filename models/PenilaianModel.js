@@ -25,7 +25,13 @@ const Penilaian = db.define('Penilaian', {
     form_penilaian: {
         type: DataTypes.STRING
     },
-    answer: {
+    answervisual: {
+        type: DataTypes.TEXT
+    },
+    answerformula: {
+        type: DataTypes.TEXT
+    },
+    answercalcu: {
         type: DataTypes.TEXT
     },
     ket_penilaian: {
