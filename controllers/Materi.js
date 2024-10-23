@@ -7,26 +7,28 @@ export const getMateri = async (req, res) => {
     const limit = 8;
     const offset = (page - 1) * limit;
     const search = req.query.search || '';
-    const sortOrder = req.query.sortOrder || "desc";
-    const order = [['updatedat', sortOrder]];
+    const sortOrder = req.query.sort;
 
     try {
-        const userWhereClause = {
-            name: {
+        const validSortOrders = ['asc', 'desc'];
+        const orderDirection = sortOrder && validSortOrders.includes(sortOrder) ? sortOrder : 'desc'; // Default ke 'desc'
+
+        const whereCondition = search ? {
+            name_materi: {
                 [Op.like]: `%${search}%`
             }
-        };
+        } : {};
 
         const response = await Materi.findAndCountAll({
             limit,
             offset,
-            order,
+            order: [['updatedat', orderDirection]],
             attributes: ['id', 'name_materi', 'img_materi', 'ket_materi', 'vid_materi', 'updatedat'],
             include: [{
                 model: User,
-                attributes: ['name', 'email'],
-                where: userWhereClause
-            }]
+                attributes: ['name'],
+            }],
+            where: whereCondition 
         });
 
         const totalPages = Math.ceil(response.count / limit);
@@ -38,6 +40,7 @@ export const getMateri = async (req, res) => {
         res.status(500).json({ msg: error.message });
     }
 };
+
 
 export const getMateriById = async (req, res) => {
     try {
@@ -90,8 +93,6 @@ export const createMateri = async (req, res) => {
         res.status(500).json({ msg: error.message });
     }
 };
-
-
 export const updateMateri = async (req, res) => {
     try {
         const materi = await Materi.findOne({

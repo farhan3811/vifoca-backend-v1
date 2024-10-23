@@ -5,28 +5,19 @@ import { Op } from "sequelize";
 
 export const getTugas = async (req, res) => {
     const page = parseInt(req.query.page, 10) || 1;
-    const limit = Math.min(parseInt(req.query.limit, 10) || 5, 50); // Max limit to 50
+    const limit = Math.min(parseInt(req.query.limit, 10) || 10, 50);
     const offset = (page - 1) * limit;
     const search = req.query.search || '';
-    const sortOrder = req.query.sortOrder === 'asc' ? 'asc' : 'desc'; // Validasi sortOrder
-    const order = [['updatedat', sortOrder]];
-    
+    const sortOrder = req.query.sort || 'desc';
+
     try {
-        const searchConditions = {
-            [Op.or]: [
-                {
-                    nama_soal: {
-                        [Op.like]: `%${search}%`
-                    }
-                }
-            ]
-        };
-        
+        const validSortOrders = ['asc', 'desc'];
+        const orderDirection = validSortOrders.includes(sortOrder) ? sortOrder : 'asc';
         const commonOptions = {
             include: [
                 {
                     model: Users,
-                    attributes: ['name', 'email']
+                    attributes: ['name']
                 },
                 {
                     model: Materis,
@@ -35,12 +26,20 @@ export const getTugas = async (req, res) => {
             ],
             limit,
             offset,
-            order,
+            order: [['nama_soal', orderDirection]], 
             attributes: { include: ['userId'] }
         };
 
+        // Menyusun kondisi pencarian
+        const searchConditions = search ? {
+            nama_soal: {
+                [Op.like]: `%${search}%` // Pencarian menggunakan LIKE
+            }
+        } : {};
+
+        // Menentukan whereClause berdasarkan role pengguna
         const whereClause = req.role === "admin" ? searchConditions : { userId: req.userId, ...searchConditions };
-        
+
         const response = await Tugas.findAndCountAll({
             ...commonOptions,
             where: whereClause
@@ -60,7 +59,6 @@ export const getTugas = async (req, res) => {
     }
 };
 
-
 export const getTugasByMateri = async (req, res) => {
     const { materi_id } = req.params;
     try {
@@ -74,7 +72,7 @@ export const getTugasByMateri = async (req, res) => {
             include: [
                 {
                     model: Users,
-                    attributes: ['name', 'email']
+                    attributes: ['name']
                 }
             ]
         });
@@ -94,7 +92,7 @@ export const getTugasById = async (req, res) => {
             include: [
                 {
                     model: Users,
-                    attributes: ['name', 'email']
+                    attributes: ['name']
                 },
                 {
                     model: Materis,

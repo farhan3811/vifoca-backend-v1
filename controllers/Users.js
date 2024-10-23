@@ -9,21 +9,28 @@ export const getUsers = async (req, res) => {
     const offset = (page - 1) * limit;
     const search = req.query.search || '';
     const sortOrder = req.query.sortOrder || "desc";
+    const isApproved = req.query.isApproved !== undefined ? req.query.isApproved === 'true' : undefined;
 
     try {
         const validSortOrders = ["asc", "desc"];
         const orderDirection = validSortOrders.includes(sortOrder) ? sortOrder : "desc";
         const order = ["updatedat", orderDirection];
+        const whereClause = {
+            name: {
+                [Op.like]: `%${search}%`
+            }
+        };
+        
+        if (isApproved !== undefined) {
+            whereClause.isApproved = isApproved;
+        }
+
         const response = await User.findAndCountAll({
             limit,
             offset,
             order: [order],
             attributes: ['uuid', 'name', 'prodi', 'nim', 'email','nomorhp','tgllahir', 'avatar', 'createdat', 'updatedat', 'role', 'isApproved'],
-            where: {
-                name: {
-                    [Op.like]: `%${search}%`
-                }
-            },
+            where: whereClause,
         });
 
         const totalPages = Math.ceil(response.count / limit);
@@ -36,6 +43,7 @@ export const getUsers = async (req, res) => {
         res.status(500).json({ msg: error.message });
     }
 };
+
 
 export const getUserById = async (req, res) => {
     try {
@@ -175,7 +183,7 @@ export const approveUser = async (req, res) => {
   
   export const getPendingUsers = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
-    const limit = 5;
+    const limit = 10;
     const offset = (page - 1) * limit;
     const search = req.query.search || '';
     const sortOrder = req.query.sortOrder || "desc";

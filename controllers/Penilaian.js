@@ -4,8 +4,8 @@ import Tugas from "../models/TugasModel.js";
 import { Op } from "sequelize";
 
 export const getPenilaian = async (req, res) => {
-  const page = parseInt(req.query.page, 10) || 1;
-  const limit = Math.min(parseInt(req.query.limit, 10) || 5, 50); 
+  const page = parseInt(req.query.page) || 1;
+  const limit = 4;
   const offset = (page - 1) * limit;
   const search = req.query.search || '';
   const sortOrder = req.query.sortOrder || 'desc';
@@ -14,48 +14,32 @@ export const getPenilaian = async (req, res) => {
   try {
     const searchConditions = {
       [Op.or]: [
-        {
-          form_penilaian: {
-            [Op.like]: `%${search}%`
-          }
-        },
-        {
-          ket_penilaian: {
-            [Op.like]: `%${search}%`
-          }
-        }
+        { form_penilaian: { [Op.like]: `%${search}%` }},
+        { ket_penilaian: { [Op.like]: `%${search}%` }},
+        { '$tuga.nama_soal$': { [Op.like]: `%${search}%` }}
       ]
     };
 
-    const commonOptions = {
-      include: [
-        {
-          model: Users,
-          attributes: ['name', 'email','role']
-        },
-        {
-          model: Tugas,
-          attributes: ['nama_soal', 'ket_assigment', 'materi_id', 'deadline', 'userId']
-        }
-      ],
-      limit,
-      offset,
-      order,
-      attributes: { include: ['userId'] }
-    };
     const whereClause = req.role === "admin" 
       ? searchConditions 
       : {
           ...searchConditions,
           [Op.or]: [
             { userId: req.userId },
-            { '$tuga.userId$': req.userId } 
+            { '$tuga.userId$': req.userId }
           ]
         };
 
     const response = await Penilaian.findAndCountAll({
-      ...commonOptions,
-      where: whereClause
+      include: [
+        { model: Users, attributes: ['name', 'role'] },
+        { model: Tugas, attributes: ['nama_soal', 'ket_assigment', 'materi_id', 'deadline', 'userId'] }
+      ],
+      where: whereClause,
+      limit,
+      offset,
+      order,
+      attributes: { include: ['userId'] }
     });
 
     const totalPages = Math.ceil(response.count / limit);
@@ -72,6 +56,7 @@ export const getPenilaian = async (req, res) => {
   }
 };
 
+
 export const getPenilaianById = async (req, res) => {
   try {
     const penilaian = await Penilaian.findOne({
@@ -79,7 +64,7 @@ export const getPenilaianById = async (req, res) => {
       include: [
         {
           model: Users,
-          attributes: ['name', 'email','role']
+          attributes: ['name','role']
         },
         {
           model: Tugas,
@@ -131,7 +116,7 @@ export const updatePenilaian = async (req, res) => {
       include: [
         {
           model: Users,
-          attributes: ['name', 'email']
+          attributes: ['name']
         },
         {
           model: Tugas,
